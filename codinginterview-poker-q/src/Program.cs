@@ -1,23 +1,24 @@
 ﻿using codinginterview_poker_q.src.Enums;
+using codinginterview_poker_q.src.Struct;
 
-List<string> CreateDeck()
+List<Card> CreateDeck()
 {
     var deck = (from suit in Enum.GetValues<Suits>()
                 from rank in Enum.GetValues<Ranks>()
-                select $"{rank.GetString()}{suit.GetString()}").ToList();
+                select new Card(rank, suit)).ToList();
     
     deck = ShuffleDeck(deck);
 
     return deck;
 }
 
-List<string> ShuffleDeck(List<string> deck) //could use other shuffling algorithms, like Fisher-Yates
+List<Card> ShuffleDeck(List<Card> deck) //could use other shuffling algorithms, like Fisher-Yates
 {
     var random = new Random();
     return deck.OrderBy(x => random.Next()).ToList();
 }
 
-List<string> DealHand(List<string> deck)  // key point: have to remove the cards from the deck after dealing
+List<Card> DealHand(List<Card> deck)  // key point: have to remove the cards from the deck after dealing
 {
     int pokerHand = 5;
     var hand = deck.Take(pokerHand).ToList();
@@ -25,12 +26,12 @@ List<string> DealHand(List<string> deck)  // key point: have to remove the cards
     return hand;
 }
 
-Scores ScoreHand(List<string> hand)
+Scores ScoreHand(List<Card> hand)
 {
     Scores score = Scores.HigherCard;
 
     // create an ascending list of the hand's ranks
-    var handRanks = hand.Select(x => RanksExtensions.FromString(x[..^1])).OrderBy(x => x).ToList();
+    var handRanks = hand.Select(x => x.Rank).OrderBy(x => x).ToList();
 
     // check for the border cases since A is the last in my enum
     var isLowAceStraight = handRanks.SequenceEqual([Ranks.A, Ranks.Two, Ranks.Three, Ranks.Four, Ranks.Five]);
@@ -42,10 +43,10 @@ Scores ScoreHand(List<string> hand)
         || isRoyalStraight;
 
     // flush cases
-    if (hand.All(x => x.Contains(Suits.Hearts.GetString())) ||
-        hand.All(x => x.Contains(Suits.Spades.GetString())) ||
-        hand.All(x => x.Contains(Suits.Clubs.GetString())) ||
-        hand.All(x => x.Contains(Suits.Diamonds.GetString())))
+    if (hand.All(x => x.Suit == Suits.Hearts) ||
+        hand.All(x => x.Suit == Suits.Spades) ||
+        hand.All(x => x.Suit == Suits.Clubs) ||
+        hand.All(x => x.Suit == Suits.Diamonds))
     {
         score = Scores.Flush;
 
@@ -60,24 +61,24 @@ Scores ScoreHand(List<string> hand)
         }
     }
 
-    // four of a Kind
+    // four of a kind
     if (handRanks.GroupBy(x => x).Any(g => g.Count() == 4))
         score = Scores.FourOfAKind;
 
-    // three of a Kind
+    // three of a kind
     if (handRanks.GroupBy(x => x).Any(g => g.Count() == 3))
         score = Scores.ThreeOfAKind;
 
-    // one Pair
+    // one pair
     if (handRanks.GroupBy(x => x).Any(g => g.Count() == 2))
     {
         score = Scores.OnePair;
 
-        // two Pair
+        // two pair
         if (handRanks.GroupBy(x => x).Count(g => g.Count() == 2) == 2)
             score = Scores.TwoPair;
 
-        // three of a Kind
+        // three of a kind
         if (handRanks.GroupBy(x => x).Any(g => g.Count() == 3))
             score = Scores.FullHouse;
     }
@@ -91,7 +92,7 @@ void ExampleRun()
     var hand = DealHand(deck);
     var score = ScoreHand(hand);
 
-    Console.WriteLine($"Your hand: [{String.Join(", ", hand)}], Score: {score}");
+    Console.WriteLine($"Your hand: [{String.Join(", ", hand.ToString())}], Score: {score}");
 }
 
 var deck = CreateDeck();
