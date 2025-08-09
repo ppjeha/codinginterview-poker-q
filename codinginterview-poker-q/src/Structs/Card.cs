@@ -1,6 +1,6 @@
 ﻿using codinginterview_poker_q.src.Enums;
 
-namespace codinginterview_poker_q.src.Struct;
+namespace codinginterview_poker_q.src.Structs;
 
 public readonly struct Card
 {

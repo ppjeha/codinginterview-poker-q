@@ -1,5 +1,5 @@
 ﻿using codinginterview_poker_q.src.Enums;
-using codinginterview_poker_q.src.Struct;
+using codinginterview_poker_q.src.Structs;
 
 List<Card> CreateDeck()
 {
